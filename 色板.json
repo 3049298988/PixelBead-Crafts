@@ -1,0 +1,282 @@
+[
+  {
+    "index": 1,
+    "row": 1,
+    "col": 1,
+    "hex": "#282828",
+    "raw": 2631720
+  },
+  {
+    "index": 2,
+    "row": 1,
+    "col": 2,
+    "hex": "#CFCFCF",
+    "raw": 13619151
+  },
+  {
+    "index": 3,
+    "row": 1,
+    "col": 3,
+    "hex": "#FAF7EE",
+    "raw": 16447470
+  },
+  {
+    "index": 4,
+    "row": 1,
+    "col": 4,
+    "hex": "#FFFFFF",
+    "raw": 16777215
+  },
+  {
+    "index": 5,
+    "row": 2,
+    "col": 1,
+    "hex": "#F7373F",
+    "raw": 16201535
+  },
+  {
+    "index": 6,
+    "row": 2,
+    "col": 2,
+    "hex": "#B70C00",
+    "raw": 11996160
+  },
+  {
+    "index": 7,
+    "row": 2,
+    "col": 3,
+    "hex": "#FB0E57",
+    "raw": 16453207
+  },
+  {
+    "index": 8,
+    "row": 2,
+    "col": 4,
+    "hex": "#FFAEA3",
+    "raw": 16756387
+  },
+  {
+    "index": 9,
+    "row": 3,
+    "col": 1,
+    "hex": "#FFB087",
+    "raw": 16756871
+  },
+  {
+    "index": 10,
+    "row": 3,
+    "col": 2,
+    "hex": "#FFE5D4",
+    "raw": 16770516
+  },
+  {
+    "index": 11,
+    "row": 3,
+    "col": 3,
+    "hex": "#FFF9F4",
+    "raw": 16775668
+  },
+  {
+    "index": 12,
+    "row": 3,
+    "col": 4,
+    "hex": "#FFFDEF",
+    "raw": 16776687
+  },
+  {
+    "index": 13,
+    "row": 4,
+    "col": 1,
+    "hex": "#F4E9DE",
+    "raw": 16050654
+  },
+  {
+    "index": 14,
+    "row": 4,
+    "col": 2,
+    "hex": "#FCE6BF",
+    "raw": 16574143
+  },
+  {
+    "index": 15,
+    "row": 4,
+    "col": 3,
+    "hex": "#FA7428",
+    "raw": 16413736
+  },
+  {
+    "index": 16,
+    "row": 4,
+    "col": 4,
+    "hex": "#F7A34D",
+    "raw": 16229197
+  },
+  {
+    "index": 17,
+    "row": 5,
+    "col": 1,
+    "hex": "#FFB200",
+    "raw": 16757248
+  },
+  {
+    "index": 18,
+    "row": 5,
+    "col": 2,
+    "hex": "#FFE239",
+    "raw": 16769593
+  },
+  {
+    "index": 19,
+    "row": 5,
+    "col": 3,
+    "hex": "#FFF5A5",
+    "raw": 16774565
+  },
+  {
+    "index": 20,
+    "row": 5,
+    "col": 4,
+    "hex": "#CED08D",
+    "raw": 13553805
+  },
+  {
+    "index": 21,
+    "row": 6,
+    "col": 1,
+    "hex": "#D9F47F",
+    "raw": 14283903
+  },
+  {
+    "index": 22,
+    "row": 6,
+    "col": 2,
+    "hex": "#7F8100",
+    "raw": 8356096
+  },
+  {
+    "index": 23,
+    "row": 6,
+    "col": 3,
+    "hex": "#CFA963",
+    "raw": 13609315
+  },
+  {
+    "index": 24,
+    "row": 6,
+    "col": 4,
+    "hex": "#C5A787",
+    "raw": 12953479
+  },
+  {
+    "index": 25,
+    "row": 7,
+    "col": 1,
+    "hex": "#C6AB2F",
+    "raw": 13019951
+  },
+  {
+    "index": 26,
+    "row": 7,
+    "col": 2,
+    "hex": "#4A3215",
+    "raw": 4862485
+  },
+  {
+    "index": 27,
+    "row": 7,
+    "col": 3,
+    "hex": "#885624",
+    "raw": 8934948
+  },
+  {
+    "index": 28,
+    "row": 7,
+    "col": 4,
+    "hex": "#615267",
+    "raw": 6378087
+  },
+  {
+    "index": 29,
+    "row": 8,
+    "col": 1,
+    "hex": "#312A52",
+    "raw": 3222098
+  },
+  {
+    "index": 30,
+    "row": 8,
+    "col": 2,
+    "hex": "#4351B3",
+    "raw": 4411827
+  },
+  {
+    "index": 31,
+    "row": 8,
+    "col": 3,
+    "hex": "#6A51B8",
+    "raw": 6967736
+  },
+  {
+    "index": 32,
+    "row": 8,
+    "col": 4,
+    "hex": "#D7BCF9",
+    "raw": 14138617
+  },
+  {
+    "index": 33,
+    "row": 9,
+    "col": 1,
+    "hex": "#CFD6FE",
+    "raw": 13620990
+  },
+  {
+    "index": 34,
+    "row": 9,
+    "col": 2,
+    "hex": "#C3C6DB",
+    "raw": 12830427
+  },
+  {
+    "index": 35,
+    "row": 9,
+    "col": 3,
+    "hex": "#73C7D7",
+    "raw": 7587799
+  },
+  {
+    "index": 36,
+    "row": 9,
+    "col": 4,
+    "hex": "#CAEBF6",
+    "raw": 13298678
+  },
+  {
+    "index": 37,
+    "row": 10,
+    "col": 1,
+    "hex": "#A3F3FF",
+    "raw": 10744831
+  },
+  {
+    "index": 38,
+    "row": 10,
+    "col": 2,
+    "hex": "#53CBBA",
+    "raw": 5491642
+  },
+  {
+    "index": 39,
+    "row": 10,
+    "col": 3,
+    "hex": "#CCECE0",
+    "raw": 13429984
+  },
+  {
+    "index": 40,
+    "row": 10,
+    "col": 4,
+    "hex": "#2E4275",
+    "raw": 3031669
+  }
+]

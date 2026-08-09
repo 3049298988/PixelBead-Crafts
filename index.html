@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelBead Crafts - 拼豆图纸像素转换与色板匹配工具</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 50%, #e0f2fe 100%);
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --input-border: rgba(203, 213, 225, 0.8);
+            --canvas-bg: rgba(241, 245, 249, 0.6);
+            --item-bg: rgba(255, 255, 255, 0.85);
+        }
+
+        /* 自动深色模式适配 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #6366f1;
+                --primary-hover: #4f46e5;
+                --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f2942 100%);
+                --glass-bg: rgba(30, 41, 59, 0.7);
+                --glass-border: rgba(255, 255, 255, 0.12);
+                --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --input-bg: rgba(15, 23, 42, 0.6);
+                --input-border: rgba(51, 65, 85, 0.8);
+                --canvas-bg: rgba(15, 23, 42, 0.6);
+                --item-bg: rgba(30, 41, 59, 0.85);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .app-header h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .app-header p {
+            margin: 6px 0 0 0;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-sizing: border-box;
+        }
+
+        .control-panel {
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .view-panel {
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .row-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .row-group > * {
+            flex: 1;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        input[type="file"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="file"] {
+            padding: 6px;
+            font-size: 12px;
+        }
+
+        input[type="range"] {
+            flex: 2;
+            accent-color: var(--primary);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-full {
+            width: 100%;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        .color-mapping-container {
+            max-height: 220px;
+            overflow-y: auto;
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            background: var(--input-bg);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .color-mapping-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: var(--item-bg);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .color-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 140px;
+        }
+
+        .color-badge {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        .color-mapping-item select {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+            flex: 1;
+        }
+
+        .canvas-container {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            min-height: 60vh;
+            border-radius: 12px;
+            overflow: auto;
+            background: var(--canvas-bg);
+            border: 1px dashed var(--input-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            touch-action: none;
+        }
+
+        .hint-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* 页面底部声明与引导样式 */
+        .app-footer {
+            margin-top: 30px;
+            padding: 16px 20px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: var(--glass-shadow);
+            max-width: 1600px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .app-footer p {
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        .app-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .app-footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            body { padding: 10px; }
+            .app-container { grid-template-columns: 1fr; }
+            .control-panel { max-height: none; }
+            .canvas-container { min-height: 50vh; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-header">
+    <h1>PixelBead Crafts</h1>
+    <p>拼豆图纸像素转换与色板匹配工具</p>
+</div>
+
+<div class="app-container">
+    <div class="glass-panel control-panel">
+        <div class="form-group">
+            <label>1. 上传图片 (成品截图/设计图)</label>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        
+        <div class="form-group">
+            <label>2. 色板设置</label>
+            <div class="row-group">
+                <input type="file" id="paletteFile" accept=".json">
+                <button type="button" id="onlineUpdateBtn" style="flex:0 0 auto;">在线更新</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>网格规格 (按正方形单格计算)</label>
+            <div class="row-group">
+                <div>
+                    <label style="font-weight:normal;">列数 (X)</label>
+                    <input type="number" id="colsInput" value="32" min="1">
+                </div>
+                <div>
+                    <label style="font-weight:normal;">行数 (Y)</label>
+                    <input type="number" id="rowsInput" value="37" min="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>控制点/手柄大小</label>
+            <div class="row-group">
+                <input type="range" id="handleSizeRange" min="8" max="40" value="16">
+                <input type="number" id="handleSizeInput" min="8" max="40" value="16" style="flex:1;">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox-group">
+                <input type="checkbox" id="allowOutOfBounds">
+                <span>允许方框超出图片边界</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>采样模式</label>
+            <select id="samplingMethod">
+                <option value="center">中心点取色</option>
+                <option value="4point">4点采样平均</option>
+                <option value="average">区域颜色平均</option>
+                <option value="majority" selected>多数表决 (防噪点)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>色板 JSON 数据</label>
+            <textarea id="paletteInput">[]</textarea>
+        </div>
+        
+        <button id="generateBtn" class="btn-full" style="padding:12px; font-size:15px;">生成与采样分析</button>
+
+        <div class="form-group" id="colorMappingGroup" style="display: none;">
+            <label>已采到的颜色列表 (更改下拉框批量替换全局颜色)</label>
+            <div id="colorMappingList" class="color-mapping-container"></div>
+        </div>
+
+        <div class="form-group">
+            <label>转换结果</label>
+            <textarea id="outputJson" readonly placeholder="点击上方按钮生成 JSON"></textarea>
+            <button id="copyJsonBtn" type="button" class="btn-full" style="padding:10px; font-size:14px; margin-top:4px;">一键复制 JSON</button>
+        </div>
+    </div>
+
+    <div class="glass-panel view-panel">
+        <p class="hint-text">操作提示：拖拽网格内部可整体平移。拖拽周边及四角手柄可拉伸，程序自动锁定单元格为正方形。</p>
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<footer class="app-footer">
+    <p>声明：本工具所有图像采样与分析过程均在浏览器本地安全完成，不会上传任何数据至服务器。</p>
+    <p>
+        开发者：<a href="https://github.com/3049298988" target="_blank" rel="noopener noreferrer">3049298988</a> | 
+        项目开源主页：<a href="https://github.com/3049298988/PixelBead-Crafts" target="_blank" rel="noopener noreferrer">PixelBead-Crafts</a>
+    </p>
+</footer>
+
+<script>
+    const STORAGE_KEY = 'bead_tool_settings_v1';
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
+    const offscreenCanvas = document.createElement('canvas');
+    const offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+
+    let img = new Image();
+    let grid = { x: 50, y: 50, w: 400, h: 400, cols: 32, rows: 37 };
+    let isDragging = false;
+    let dragType = null; 
+    let dragStartX, dragStartY;
+    let initialGrid;
+
+    let handleRadius = 16;
+    let rawSampledCells = [];
+    let colorOverrides = {};
+
+    function saveSettingsToStorage() {
+        const settings = {
+            cols: document.getElementById('colsInput').value,
+            rows: document.getElementById('rowsInput').value,
+            handleSize: document.getElementById('handleSizeInput').value,
+            allowOutOfBounds: document.getElementById('allowOutOfBounds').checked,
+            samplingMethod: document.getElementById('samplingMethod').value,
+            paletteJson: document.getElementById('paletteInput').value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    }
+
+    function loadSettingsFromStorage() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return false;
+        try {
+            const settings = JSON.parse(saved);
+            if (settings.cols) document.getElementById('colsInput').value = settings.cols;
+            if (settings.rows) document.getElementById('rowsInput').value = settings.rows;
+            if (settings.handleSize) syncHandleSize(settings.handleSize);
+            if (settings.allowOutOfBounds !== undefined) document.getElementById('allowOutOfBounds').checked = settings.allowOutOfBounds;
+            if (settings.samplingMethod) document.getElementById('samplingMethod').value = settings.samplingMethod;
+            if (settings.paletteJson) document.getElementById('paletteInput').value = settings.paletteJson;
+
+            grid.cols = parseInt(document.getElementById('colsInput').value) || 32;
+            grid.rows = parseInt(document.getElementById('rowsInput').value) || 37;
+            enforceSquareCells();
+            return true;
+        } catch (e) {
+            console.error('加载本地设置失败', e);
+            return false;
+        }
+    }
+
+    function fetchOnlinePalette() {
+        fetch('./色板.json?t=' + Date.now())
+            .then(response => {
+                if (!response.ok) throw new Error('网络请求错误');
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('paletteInput').value = JSON.stringify(data, null, 4);
+                saveSettingsToStorage();
+                alert('在线色板更新完成！');
+            })
+            .catch(() => {
+                alert('加载 ./色板.json 失败，请检查文件是否存在。');
+            });
+    }
+
+    document.getElementById('onlineUpdateBtn').addEventListener('click', fetchOnlinePalette);
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const loaded = loadSettingsFromStorage();
+        if (!loaded || !document.getElementById('paletteInput').value.trim() || document.getElementById('paletteInput').value === '[]') {
+            fetchOnlinePalette();
+        }
+
+        const autoSaveInputs = ['colsInput', 'rowsInput', 'allowOutOfBounds', 'samplingMethod', 'paletteInput'];
+        autoSaveInputs.forEach(id => {
+            document.getElementById(id).addEventListener('change', saveSettingsToStorage);
+        });
+    });
+
+    const handleRange = document.getElementById('handleSizeRange');
+    const handleInput = document.getElementById('handleSizeInput');
+
+    function syncHandleSize(val) {
+        val = Math.max(8, Math.min(40, parseInt(val) || 16));
+        handleRange.value = val;
+        handleInput.value = val;
+        handleRadius = val;
+        draw();
+    }
+    handleRange.addEventListener('input', (e) => { syncHandleSize(e.target.value); saveSettingsToStorage(); });
+    handleInput.addEventListener('input', (e) => { syncHandleSize(e.target.value); saveSettingsToStorage(); });
+
+    document.getElementById('paletteFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const parsed = JSON.parse(event.target.result);
+                document.getElementById('paletteInput').value = JSON.stringify(parsed, null, 4);
+                saveSettingsToStorage();
+            } catch (err) {
+                alert('色板 JSON 解析失败');
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    function enforceSquareCells() {
+        if (grid.cols > 0 && grid.rows > 0) {
+            grid.h = grid.w * (grid.rows / grid.cols);
+        }
+    }
+
+    document.getElementById('colsInput').addEventListener('change', (e) => { 
+        grid.cols = Math.max(1, parseInt(e.target.value) || 1); 
+        enforceSquareCells();
+        clampGridBounds();
+        draw(); 
+    });
+    document.getElementById('rowsInput').addEventListener('change', (e) => { 
+        grid.rows = Math.max(1, parseInt(e.target.value) || 1); 
+        enforceSquareCells();
+        clampGridBounds();
+        draw(); 
+    });
+
+    document.getElementById('allowOutOfBounds').addEventListener('change', () => {
+        clampGridBounds();
+        draw();
+    });
+
+    function clampGridBounds() {
+        const allowOut = document.getElementById('allowOutOfBounds').checked;
+        if (allowOut || !img.src) return;
+
+        const ratio = grid.rows / grid.cols;
+
+        if (grid.w > img.width) {
+            grid.w = img.width;
+            grid.h = grid.w * ratio;
+        }
+        if (grid.h > img.height) {
+            grid.h = img.height;
+            grid.w = grid.h / ratio;
+        }
+
+        grid.x = Math.max(0, Math.min(grid.x, img.width - grid.w));
+        grid.y = Math.max(0, Math.min(grid.y, img.height - grid.h));
+    }
+
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                offscreenCanvas.width = img.width;
+                offscreenCanvas.height = img.height;
+                offscreenCtx.drawImage(img, 0, 0);
+
+                const imgRatio = img.width / img.height;
+                const gridRatio = grid.cols / grid.rows;
+
+                if (Math.abs(imgRatio - gridRatio) < 0.005) {
+                    grid.x = 0;
+                    grid.y = 0;
+                    grid.w = img.width;
+                    grid.h = img.height;
+                } else {
+                    const minEdge = Math.min(img.width, img.height);
+                    grid.w = minEdge * 0.8;
+                    enforceSquareCells();
+                    grid.x = (img.width - grid.w) / 2;
+                    grid.y = (img.height - grid.h) / 2;
+                    clampGridBounds();
+                }
+                draw();
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(file);
+    });
+
+    function getHandles() {
+        return {
+            tl: { x: grid.x, y: grid.y },
+            tr: { x: grid.x + grid.w, y: grid.y },
+            bl: { x: grid.x, y: grid.y + grid.h },
+            br: { x: grid.x + grid.w, y: grid.y + grid.h },
+            t:  { x: grid.x + grid.w / 2, y: grid.y },
+            b:  { x: grid.x + grid.w / 2, y: grid.y + grid.h },
+            l:  { x: grid.x, y: grid.y + grid.h / 2 },
+            r:  { x: grid.x + grid.w, y: grid.y + grid.h / 2 }
+        };
+    }
+
+    function draw() {
+        if (!img.src) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+
+        ctx.fillStyle = 'rgba(79, 70, 229, 0.12)';
+        ctx.fillRect(grid.x, grid.y, grid.w, grid.h);
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = Math.max(1, canvas.width / 900);
+        ctx.beginPath();
+        
+        const cellW = grid.w / grid.cols;
+        const cellH = grid.h / grid.rows;
+        
+        for(let i = 0; i <= grid.cols; i++) {
+            ctx.moveTo(grid.x + i * cellW, grid.y);
+            ctx.lineTo(grid.x + i * cellW, grid.y + grid.h);
+        }
+        for(let i = 0; i <= grid.rows; i++) {
+            ctx.moveTo(grid.x, grid.y + i * cellH);
+            ctx.lineTo(grid.x + grid.w, grid.y + i * cellH);
+        }
+        ctx.stroke();
+
+        const handles = getHandles();
+        for(let key in handles) {
+            ctx.beginPath();
+            ctx.arc(handles[key].x, handles[key].y, handleRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#4f46e5';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = Math.max(2, handleRadius / 4);
+            ctx.stroke();
+        }
+    }
+
+    function getCanvasPoint(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+
+    canvas.addEventListener('pointerdown', function(e) {
+        if (!img.src) return;
+        canvas.setPointerCapture(e.pointerId);
+        const pt = getCanvasPoint(e);
+        const handles = getHandles();
+        dragType = null;
+
+        const hitThreshold = handleRadius * 1.5;
+        for(let key in handles) {
+            if(Math.hypot(pt.x - handles[key].x, pt.y - handles[key].y) < hitThreshold) {
+                dragType = key;
+                break;
+            }
+        }
+
+        if(!dragType) {
+            if(pt.x > grid.x && pt.x < grid.x + grid.w && pt.y > grid.y && pt.y < grid.y + grid.h) {
+                dragType = 'all';
+            }
+        }
+
+        if(dragType) {
+            isDragging = true;
+            dragStartX = pt.x;
+            dragStartY = pt.y;
+            initialGrid = { ...grid };
+        }
+    });
+
+    canvas.addEventListener('pointermove', function(e) {
+        if(!isDragging) return;
+        const pt = getCanvasPoint(e);
+        const dx = pt.x - dragStartX;
+        const dy = pt.y - dragStartY;
+        const ratio = grid.rows / grid.cols;
+
+        if (dragType === 'all') {
+            grid.x = initialGrid.x + dx;
+            grid.y = initialGrid.y + dy;
+        } else if (dragType === 'br' || dragType === 'r') {
+            grid.w = Math.max(30, initialGrid.w + dx);
+            grid.h = grid.w * ratio;
+        } else if (dragType === 'bl' || dragType === 'l') {
+            const newW = Math.max(30, initialGrid.w - dx);
+            grid.x = initialGrid.x + (initialGrid.w - newW);
+            grid.w = newW;
+            grid.h = grid.w * ratio;
+        } else if (dragType === 'tr' || dragType === 't') {
+            grid.w = Math.max(30, initialGrid.w + dx);
+            grid.h = grid.w * ratio;
+            grid.y = initialGrid.y + (initialGrid.h - grid.h);
+        } else if (dragType === 'tl') {
+            const newW = Math.max(30, initialGrid.w - dx);
+            grid.x = initialGrid.x + (initialGrid.w - newW);
+            grid.w = newW;
+            grid.h = grid.w * ratio;
+            grid.y = initialGrid.y + (initialGrid.h - grid.h);
+        } else if (dragType === 'b') {
+            grid.h = Math.max(30, initialGrid.h + dy);
+            grid.w = grid.h / ratio;
+        }
+
+        clampGridBounds();
+        draw();
+    });
+
+    canvas.addEventListener('pointerup', function(e) {
+        if (isDragging) {
+            canvas.releasePointerCapture(e.pointerId);
+            isDragging = false;
+        }
+    });
+
+    function hexToRgb(hex) {
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
+    }
+
+    function getColorDistance(rgb1, rgb2) {
+        return Math.sqrt((rgb1.r - rgb2.r)**2 + (rgb1.g - rgb2.g)**2 + (rgb1.b - rgb2.b)**2);
+    }
+
+    function getClosestPaletteColor(r, g, b, palette) {
+        let minDistance = Infinity;
+        let closest = null;
+        let targetRgb = { r, g, b };
+        for (let item of palette) {
+            let pRgb = hexToRgb(item.hex);
+            if (!pRgb) continue;
+            let dist = getColorDistance(targetRgb, pRgb);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closest = item;
+            }
+        }
+        return closest;
+    }
+
+    function sampleCellColor(startX, startY, w, h, method, palette) {
+        if (method === 'center') {
+            let px = Math.floor(startX + w / 2);
+            let py = Math.floor(startY + h / 2);
+            if (px < 0 || py < 0 || px >= offscreenCanvas.width || py >= offscreenCanvas.height) return null;
+            const p = offscreenCtx.getImageData(px, py, 1, 1).data;
+            if (p[3] === 0) return null;
+            return getClosestPaletteColor(p[0], p[1], p[2], palette);
+        } 
+        else if (method === '4point') {
+            const points = [
+                [startX + w * 0.25, startY + h * 0.25],
+                [startX + w * 0.75, startY + h * 0.25],
+                [startX + w * 0.25, startY + h * 0.75],
+                [startX + w * 0.75, startY + h * 0.75]
+            ];
+            let tr = 0, tg = 0, tb = 0, count = 0;
+            for (let pt of points) {
+                let px = Math.floor(pt[0]);
+                let py = Math.floor(pt[1]);
+                if (px >= 0 && py >= 0 && px < offscreenCanvas.width && py < offscreenCanvas.height) {
+                    let p = offscreenCtx.getImageData(px, py, 1, 1).data;
+                    if (p[3] > 0) {
+                        tr += p[0]; tg += p[1]; tb += p[2];
+                        count++;
+                    }
+                }
+            }
+            if (count === 0) return null;
+            return getClosestPaletteColor(tr / count, tg / count, tb / count, palette);
+        }
+        else if (method === 'average') {
+            let tr = 0, tg = 0, tb = 0, count = 0;
+            let stepX = Math.max(1, w / 5);
+            let stepY = Math.max(1, h / 5);
+            for (let x = startX + stepX / 2; x < startX + w; x += stepX) {
+                for (let y = startY + stepY / 2; y < startY + h; y += stepY) {
+                    let px = Math.floor(x);
+                    let py = Math.floor(y);
+                    if (px >= 0 && py >= 0 && px < offscreenCanvas.width && py < offscreenCanvas.height) {
+                        let p = offscreenCtx.getImageData(px, py, 1, 1).data;
+                        if (p[3] > 0) {
+                            tr += p[0]; tg += p[1]; tb += p[2];
+                            count++;
+                        }
+                    }
+                }
+            }
+            if (count === 0) return null;
+            return getClosestPaletteColor(tr / count, tg / count, tb / count, palette);
+        }
+        else if (method === 'majority') {
+            let counts = {};
+            let stepX = Math.max(1, w / 4);
+            let stepY = Math.max(1, h / 4);
+            for (let x = startX + stepX / 2; x < startX + w; x += stepX) {
+                for (let y = startY + stepY / 2; y < startY + h; y += stepY) {
+                    let px = Math.floor(x);
+                    let py = Math.floor(y);
+                    if (px >= 0 && py >= 0 && px < offscreenCanvas.width && py < offscreenCanvas.height) {
+                        let p = offscreenCtx.getImageData(px, py, 1, 1).data;
+                        if (p[3] > 0) {
+                            let matched = getClosestPaletteColor(p[0], p[1], p[2], palette);
+                            if (matched) {
+                                let key = matched.hex;
+                                counts[key] = (counts[key] || 0) + 1;
+                            }
+                        }
+                    }
+                }
+            }
+            let maxCount = -1;
+            let bestHex = null;
+            for (let hex in counts) {
+                if (counts[hex] > maxCount) {
+                    maxCount = counts[hex];
+                    bestHex = hex;
+                }
+            }
+            if (!bestHex) return null;
+            for (let item of palette) {
+                if (item.hex.toUpperCase() === bestHex.toUpperCase()) return item;
+            }
+        }
+        return null;
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', function() {
+        if (!img.src) {
+            alert('请先上传图片');
+            return;
+        }
+
+        let palette = [];
+        try {
+            palette = JSON.parse(document.getElementById('paletteInput').value);
+        } catch (e) {
+            alert('色板 JSON 格式错误');
+            return;
+        }
+
+        const method = document.getElementById('samplingMethod').value;
+        const cellW = grid.w / grid.cols;
+        const cellH = grid.h / grid.rows;
+        
+        rawSampledCells = [];
+        colorOverrides = {};
+
+        for (let y = 0; y < grid.rows; y++) {
+            for (let x = 0; x < grid.cols; x++) {
+                const startX = grid.x + x * cellW;
+                const startY = grid.y + y * cellH;
+                
+                const matched = sampleCellColor(startX, startY, cellW, cellH, method, palette);
+                if (matched) {
+                    rawSampledCells.push({
+                        x: x,
+                        y: y,
+                        originalHex: matched.hex.toUpperCase(),
+                        originalPalPos: `第${matched.row}行第${matched.col}列`
+                    });
+                }
+            }
+        }
+
+        buildColorMappingList(palette);
+        applyMappingAndRender(palette);
+    });
+
+    function buildColorMappingList(palette) {
+        const listContainer = document.getElementById('colorMappingList');
+        const mappingGroup = document.getElementById('colorMappingGroup');
+        listContainer.innerHTML = '';
+
+        const colorCounts = {};
+        rawSampledCells.forEach(cell => {
+            colorCounts[cell.originalHex] = (colorCounts[cell.originalHex] || 0) + 1;
+        });
+
+        const uniqueHexes = Object.keys(colorCounts);
+        if (uniqueHexes.length === 0) {
+            mappingGroup.style.display = 'none';
+            return;
+        }
+
+        mappingGroup.style.display = 'flex';
+
+        uniqueHexes.forEach(origHex => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'color-mapping-item';
+
+            const origItem = palette.find(p => p.hex.toUpperCase() === origHex);
+            const posText = origItem ? `第${origItem.row}行第${origItem.col}列` : '';
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'color-info';
+            infoDiv.innerHTML = `
+                <div class="color-badge" style="background:${origHex};"></div>
+                <span>${origHex} (${posText}) - <b>${colorCounts[origHex]}格</b></span>
+            `;
+
+            const select = document.createElement('select');
+            palette.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.hex.toUpperCase();
+                opt.textContent = `${p.hex.toUpperCase()} (第${p.row}行第${p.col}列)`;
+                if (p.hex.toUpperCase() === origHex) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+
+            select.addEventListener('change', (e) => {
+                colorOverrides[origHex] = e.target.value;
+                applyMappingAndRender(palette);
+            });
+
+            itemDiv.appendChild(infoDiv);
+            itemDiv.appendChild(select);
+            listContainer.appendChild(itemDiv);
+        });
+    }
+
+    function applyMappingAndRender(palette) {
+        let seq = 1;
+        const finalCells = rawSampledCells.map(cell => {
+            const currentHex = colorOverrides[cell.originalHex] || cell.originalHex;
+            const matchedPaletteItem = palette.find(p => p.hex.toUpperCase() === currentHex);
+            
+            return {
+                x: cell.x,
+                y: cell.y,
+                seq: seq++,
+                region: 1,
+                hex: currentHex,
+                palPos: matchedPaletteItem ? `第${matchedPaletteItem.row}行第${matchedPaletteItem.col}列` : cell.originalPalPos
+            };
+        });
+
+        const outputData = {
+            size: grid.cols, 
+            cells: finalCells
+        };
+
+        document.getElementById('outputJson').value = JSON.stringify(outputData, null, 0);
+    }
+
+    document.getElementById('copyJsonBtn').addEventListener('click', function() {
+        const jsonText = document.getElementById('outputJson').value;
+        if (!jsonText) {
+            alert('暂无可复制的转换结果');
+            return;
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(jsonText).then(() => {
+                showCopySuccess();
+            }).catch(() => {
+                fallbackCopy(jsonText);
+            });
+        } else {
+            fallbackCopy(jsonText);
+        }
+    });
+
+    function fallbackCopy(text) {
+        const textarea = document.getElementById('outputJson');
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showCopySuccess();
+        } catch (err) {
+            alert('复制失败，请手动选择复制');
+        }
+    }
+
+    function showCopySuccess() {
+        const btn = document.getElementById('copyJsonBtn');
+        const origText = btn.textContent;
+        btn.textContent = '复制成功！';
+        btn.style.background = '#10b981';
+        setTimeout(() => {
+            btn.textContent = origText;
+            btn.style.background = 'var(--primary)';
+        }, 1500);
+    }
+</script>
+</body>
+</html>
