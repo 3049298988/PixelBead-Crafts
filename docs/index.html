@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelBead Crafts - 拼豆图纸像素转换与色板匹配工具</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-header">
+    <h1>PixelBead Crafts</h1>
+    <p>拼豆图纸像素转换与色板匹配工具</p>
+</div>
+
+<div class="app-container">
+    <div class="glass-panel control-panel">
+        <div class="form-group">
+            <label>1. 加载图片 (成品截图/设计图)</label>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        
+        <div class="form-group">
+            <label>2. 色板设置</label>
+            <div class="row-group">
+                <input type="file" id="paletteFile" accept=".json">
+                <button type="button" id="onlineUpdateBtn" style="flex:0 0 auto;">在线更新</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>网格规格</label>
+            <div class="row-group">
+                <div>
+                    <label style="font-weight:normal;">列数 (X)</label>
+                    <input type="number" id="colsInput" value="24" min="1">
+                </div>
+                <div>
+                    <label style="font-weight:normal;">行数 (Y)</label>
+                    <input type="number" id="rowsInput" value="24" min="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>控制点大小</label>
+            <div class="row-group">
+                <input type="range" id="handleSizeRange" min="8" max="40" value="16">
+                <input type="number" id="handleSizeInput" min="8" max="40" value="16" style="flex:1;">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox-group">
+                <input type="checkbox" id="allowOutOfBounds">
+                <span>允许方框超出图片边界</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>采样模式</label>
+            <select id="samplingMethod">
+                <option value="center">中心点取色</option>
+                <option value="4point">4点采样平均</option>
+                <option value="average">区域颜色平均</option>
+                <option value="majority" selected>多数表决 (防噪点)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>色板 JSON 数据</label>
+            <textarea id="paletteInput">[]</textarea>
+        </div>
+        
+        <button id="generateBtn" class="btn-full" style="padding:12px; font-size:15px;">生成与采样分析</button>
+
+        <div class="form-group" id="colorMappingGroup" style="display: none;">
+            <label>已采到的颜色列表 (更改下拉框批量替换全局颜色)</label>
+            <div id="colorMappingList" class="color-mapping-container"></div>
+        </div>
+
+        <div class="form-group">
+            <label>转换结果</label>
+            <textarea id="outputJson" readonly placeholder="点击上方按钮生成 JSON"></textarea>
+            <button id="copyJsonBtn" type="button" class="btn-full" style="padding:10px; font-size:14px; margin-top:4px;">一键复制 JSON</button>
+        </div>
+    </div>
+
+    <div class="glass-panel view-panel">
+        <p class="hint-text">操作提示：拖拽网格内部可整体平移。拖拽周边及四角手柄可拉伸，程序自动锁定单元格为正方形。</p>
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<footer class="app-footer">
+    <p>声明：本工具所有图像采样与分析过程均在浏览器前端离线完成，不会上传任何数据至服务器。</p>
+    <p>
+        开发者：<a href="https://github.com/3049298988" target="_blank" rel="noopener noreferrer">3049298988</a> | 
+        项目开源主页：<a href="https://github.com/3049298988/PixelBead-Crafts" target="_blank" rel="noopener noreferrer">PixelBead-Crafts</a>
+    </p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
