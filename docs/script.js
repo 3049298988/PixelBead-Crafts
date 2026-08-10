@@ -404,15 +404,53 @@ function buildColorMappingList(palette) {
 function convertArknToDraw(obj) {
     const size = obj.size || grid.cols;
     const cells = obj.cells || [];
-    const pal = []; const dgrid = new Array(size*size).fill(0);
+    
+    let paletteObjects = [];
+    try {
+        const parsed = JSON.parse(document.getElementById('paletteInput').value);
+        if (Array.isArray(parsed)) {
+            paletteObjects = [...parsed].sort((a, b) => (a.index || 0) - (b.index || 0));
+        }
+    } catch (e) {
+        paletteObjects = [];
+    }
+
+    const paletteList = paletteObjects.map(p => (p.hex || '').toUpperCase());
+
+    const defaultIndex = 4;
+    const dgrid = new Array(size * size).fill(defaultIndex);
+
     cells.forEach(c => {
-        const hex = (c.hex||'#FFFFFF').toUpperCase();
-        let idx = pal.indexOf(hex);
-        if (idx === -1) { pal.push(hex); idx = pal.length-1; }
-        const pos = c.y*size + c.x;
-        if (pos>=0 && pos<dgrid.length) dgrid[pos] = idx;
+        const hex = (c.hex || '#FFFFFF').toUpperCase();
+        let colorId = paletteList.indexOf(hex) + 1;
+        
+        if (colorId < 1) {
+            colorId = defaultIndex;
+        }
+
+        const pos = c.y * size + c.x;
+        if (pos >= 0 && pos < dgrid.length) {
+            dgrid[pos] = colorId;
+        }
     });
-    return { format:"arknights_draw-project", version:1, gridSize:size, palette:pal, grid:dgrid, selected:0, fileName:"arknights_draw", settings:{ mode:"hybrid", contrast:0, saturation:0, showNumbers:true, showGrid:true }, savedAt: new Date().toISOString() };
+
+    return {
+        format: "arknights_draw-project",
+        version: 1,
+        gridSize: size,
+        palette: paletteList,
+        grid: dgrid,
+        selected: 1,
+        fileName: "arknights_draw",
+        settings: {
+            mode: "hybrid",
+            contrast: 0,
+            saturation: 0,
+            showNumbers: true,
+            showGrid: true
+        },
+        savedAt: new Date().toISOString()
+    };
 }
 
 function applyMappingAndRender(palette, fmt='arkn-24x24') {
@@ -457,9 +495,9 @@ function handleExport(fmt) {
             if (obj.format === 'arknights_draw-project' && Array.isArray(obj.grid) && Array.isArray(obj.palette)) {
                 cols = obj.gridSize || 24;
                 obj.grid.forEach((pi, i) => {
-                    if (pi > 0 || obj.palette[pi]) {
+                    if (pi > 0 && obj.palette[pi - 1]) {
                         const x = i % cols, y = Math.floor(i / cols);
-                        cells.push({ x, y, seq: cells.length + 1, region: x < Math.floor(cols / 2) ? 1 : 2, hex: (obj.palette[pi] || '#FFFFFF').toUpperCase(), palPos: '' });
+                        cells.push({ x, y, seq: cells.length + 1, region: x < Math.floor(cols / 2) ? 1 : 2, hex: obj.palette[pi - 1].toUpperCase(), palPos: '' });
                     }
                 });
             } else if (Array.isArray(obj.cells)) {
@@ -514,9 +552,9 @@ outputJson.addEventListener('input', function() {
             document.getElementById('colsInput').value = size;
             document.getElementById('rowsInput').value = size;
             obj.grid.forEach((pi, i) => {
-                if (pi>0 || obj.palette[pi]) {
+                if (pi > 0 && obj.palette[pi - 1]) {
                     const x = i%size, y = Math.floor(i/size);
-                    cells.push({x,y,seq:cells.length+1,region:x<Math.floor(size/2)?1:2,hex:(obj.palette[pi]||'#FFFFFF').toUpperCase(),palPos:''});
+                    cells.push({x,y,seq:cells.length+1,region:x<Math.floor(size/2)?1:2,hex:obj.palette[pi - 1].toUpperCase(),palPos:''});
                 }
             });
         } else if (Array.isArray(obj.cells)) {
