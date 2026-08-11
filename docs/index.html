@@ -1,134 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixelBead Crafts - 拼豆图纸像素转换与色板匹配工具</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div class="app-header">
-    <h1>PixelBead Crafts</h1>
-    <p>拼豆图纸像素转换与色板匹配工具</p>
-</div>
-
-<div class="app-container">
-    <div class="glass-panel control-panel">
-        <div class="form-group">
-            <label>1. 加载图片 (成品截图/设计图)</label>
-            <p class="hint-text" style="margin-bottom: 6px;">
-                推荐图片来源：<a href="https://tourgrid.miraceo.com/" target="_blank" rel="noopener noreferrer">旅行「像」框</a> 的 右上角-导出原始尺寸 PNG。<br>
-                推荐图片大小为 24x24 的倍数，或者比例为正方形。
-            </p>
-            <input type="file" id="imageInput" accept="image/*">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>PixelBead Crafts - 拼豆图纸像素转换与色板匹配工具</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="app-header">
+            <h1>PixelBead Crafts</h1>
+            <p>拼豆图纸像素转换与色板匹配工具</p>
         </div>
-        
-        <div class="form-group">
-            <label>2. 色板设置</label>
-            <div class="row-group" style="align-items: center;">
-                <input type="file" id="paletteFile" accept=".json">
-                <button type="button" id="onlineUpdateBtn" class="btn" style="flex: none; width: auto; padding: 8px 16px;">在线更新</button>
-                <span id="paletteStatus" style="font-size:12px; color: var(--text-muted); white-space: nowrap;"></span>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>网格规格</label>
-            <div class="row-group">
-                <div>
-                    <label>列数 (X)</label>
-                    <input type="number" id="colsInput" value="24" min="1">
+        <div class="app-container">
+            <div class="glass-panel control-panel">
+                <div class="form-group"><label>1. 加载图片 (成品截图/设计图)</label>
+                    <p class="hint-text" style="margin-bottom: 6px;">推荐图片来源：<a href="https://tourgrid.miraceo.com/" target="_blank" rel="noopener noreferrer">旅行「像」框</a> 的 右上角-导出原始尺寸 PNG。<br> 推荐图片大小为 24x24 的倍数，或者比例为正方形。</p> <input type="file" id="imageInput" accept="image/*">
                 </div>
-                <div>
-                    <label>行数 (Y)</label>
-                    <input type="number" id="rowsInput" value="24" min="1">
+                <div class="form-group"><label>2. 色板设置</label>
+                    <div class="row-group" style="align-items: center;"><input type="file" id="paletteFile" accept=".json"> <button type="button" id="onlineUpdateBtn" class="btn" style="flex: none; width: auto; padding: 8px 16px;">在线更新</button> <span id="paletteStatus" style="font-size:12px; color: var(--text-muted); white-space: nowrap;"></span>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>控制点大小</label>
-            <div class="row-group">
-                <input type="range" id="handleSizeRange" min="8" max="40" value="16">
-                <input type="number" id="handleSizeInput" min="8" max="40" value="16" style="flex:1;">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="checkbox-group">
-                <input type="checkbox" id="allowOutOfBounds">
-                <span>允许方框超出图片边界</span>
-            </label>
-        </div>
-
-        <div class="form-group">
-            <label>采样模式</label>
-            <select id="samplingMethod">
-                <option value="center">中心点取色</option>
-                <option value="4point">4点采样平均</option>
-                <option value="average">区域颜色平均</option>
-                <option value="majority" selected>多数表决 (防噪点)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>色板 JSON 数据</label>
-            <textarea id="paletteInput">[]</textarea>
-        </div>
-        
-        <button id="generateBtn" class="btn-full">生成与采样分析</button>
-
-        <div class="form-group" id="colorMappingGroup" style="display: none;">
-            <label>已采到的颜色列表 (更改下拉框批量替换全局颜色)</label>
-            <div id="colorMappingList" class="color-mapping-container"></div>
-        </div>
-
-        <div class="form-group">
-            <label>转换结果与导出</label>
-            <div class="export-list">
-                <div class="export-item">
-                    <button id="exportArknBtn" type="button" class="btn-export">导出 arkn-24x24</button>
-                    <small class="export-desc"><a href="https://prts.chongxi.us/" target="_blank" rel="noopener">明日方舟-奇象巡演 像素画取色工具</a></small>
+                <div class="form-group"><label>网格规格</label>
+                    <div class="row-group">
+                        <div><label>列数 (X)</label> <input type="number" id="colsInput" value="24" min="1">
+                        </div>
+                        <div><label>行数 (Y)</label> <input type="number" id="rowsInput" value="24" min="1">
+                        </div>
+                    </div>
                 </div>
-                <div class="export-item">
-                    <button id="exportDrawBtn" type="button" class="btn-export">导出 arknights_draw</button>
-                    <small class="export-desc"><a href="https://hanako-777.github.io/arknights_draw/" target="_blank" rel="noopener">奇象巡展·赛博拼豆制图工具</a></small>
+                <div class="form-group"><label>控制点大小</label>
+                    <div class="row-group"><input type="range" id="handleSizeRange" min="8" max="40" value="16"> <input type="number" id="handleSizeInput" min="8" max="40" value="16" style="flex:1;">
+                    </div>
+                </div>
+                <div class="form-group"><label class="checkbox-group"> <input type="checkbox" id="allowOutOfBounds"> <span>允许方框超出图片边界</span> </label>
+                </div>
+                <div class="form-group"><label>采样模式</label> <select id="samplingMethod"> <option value="center">中心点取色</option> <option value="4point">4点采样平均</option> <option value="average">区域颜色平均</option> <option value="majority" selected>多数表决 (防噪点)</option> </select>
+                </div>
+                <div class="form-group"><label>色板 JSON 数据</label> <textarea id="paletteInput">[]</textarea>
+                </div> <button id="generateBtn" class="btn-full">生成与采样分析</button>
+                <div class="form-group" id="colorMappingGroup" style="display: none;"><label>已采到的颜色列表 (更改下拉框批量替换全局颜色)</label>
+                    <div id="colorMappingList" class="color-mapping-container"></div>
+                </div>
+                <div class="form-group"><label>转换结果与导出</label> <button id="convertJsonBtn" type="button" class="btn-export">转换 json</button> <textarea id="outputJson" placeholder="点击上方按钮生成 JSON 或在此粘贴后失去焦点以应用"></textarea>
+                    <div class="row-group" style="gap: 6px;"><button id="btnCopy" type="button" class="btn action-btn">复制内容</button> <button id="btnExportJson" type="button" class="btn action-btn">下载 JSON</button> <button id="btnDownloadPng" type="button" class="btn action-btn">下载 PNG</button> <button id="btnExportSettings" type="button" class="btn action-btn">导出设置</button>
+                    </div>
+                    <div class="row-group" style="gap: 6px; margin-top: 6px;"><a id="btnDownloadScript" href="./画板颜色自动.zjs" download class="btn action-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">自动拼豆脚本下载</a> <a id="btnZdjl" href="https://zdjl.cc/" target="_blank" rel="noopener noreferrer" class="btn action-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">自动精灵下载</a>
+                    </div>
                 </div>
             </div>
-            <textarea id="outputJson" readonly placeholder="点击上方按钮生成 JSON"></textarea>
-            <button id="copyJsonBtn" type="button" class="btn-full">一键复制 JSON</button>
-        </div>
-    </div>
-
-    <div class="glass-panel view-panel">
-        <p class="hint-text">操作提示：拖拽网格内部可整体平移。拖拽周边及四角手柄可拉伸，程序自动锁定单元格为正方形。</p>
-        <div class="canvas-container" id="canvasContainer">
-            <canvas id="canvas"></canvas>
-        </div>
-
-        <div class="preview-header-bar">
-            <span class="preview-title">拼豆效果预览 (拖拽平移 / 滚轮缩放)</span>
-            <div class="preview-buttons">
-                <button id="resetPreviewBtn" type="button" class="btn-icon" data-tooltip="重置视图">↺</button>
-                <button id="toggleGridBtn" type="button" class="btn-icon" data-tooltip="显示/隐藏网格线">⊞</button>
+            <div class="glass-panel view-panel">
+                <p class="hint-text">操作提示：拖拽网格内部可整体平移。拖拽周边及四角手柄可拉伸，程序自动锁定单元格为正方形。</p>
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="canvas"></canvas>
+                </div>
+                <div class="preview-header-bar"><span class="preview-title">拼豆效果预览 (拖拽平移 / 滚轮缩放)</span>
+                    <div class="preview-buttons"><button id="resetPreviewBtn" type="button" class="btn-icon" data-tooltip="重置视图"> <i class="icon-refresh"></i> </button> <button id="toggleGridBtn" type="button" class="btn-icon" data-tooltip="显示/隐藏网格线"> <i class="icon-grid"></i> </button>
+                    </div>
+                </div>
+                <div class="preview-container" id="previewContainer">
+                    <canvas id="previewCanvas"></canvas>
+                </div>
             </div>
         </div>
-        <div class="preview-container" id="previewContainer">
-            <canvas id="previewCanvas"></canvas>
+        <footer class="app-footer">
+            <p>声明：本工具所有图像采样与分析过程均在浏览器前端离线完成，不会上传任何数据至服务器。</p>
+            <p>开发者：<a href="https://github.com/3049298988" target="_blank" rel="noopener noreferrer">3049298988</a><br>项目开源主页：<a href="https://github.com/3049298988/PixelBead-Crafts" target="_blank" rel="noopener noreferrer">PixelBead-Crafts</a></p>
+        </footer>
+        <div id="convertModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content glass-panel">
+                <div class="modal-header">
+                    <h2 style="margin: 0; font-size: 18px;">格式转换</h2> <button id="closeConvertModalBtn" class="btn-icon">×</button>
+                </div>
+                <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="form-group"><label>选择转换格式 (结果将直接更新到输入框)</label>
+                        <div class="export-list">
+                            <div class="export-item"><button id="exportArknBtn" type="button" class="btn-export">导出为 arkn-24x24</button> <small class="export-desc"><a href="https://prts.chongxi.us/" target="_blank" rel="noopener">明日方舟-奇象巡演 像素画取色工具</a></small>
+                            </div>
+                            <div class="export-item"><button id="exportDrawBtn" type="button" class="btn-export">导出为 arknights_draw</button> <small class="export-desc"><a href="https://hanako-777.github.io/arknights_draw/" target="_blank" rel="noopener">奇象巡展·赛博拼豆制图工具</a></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
-<footer class="app-footer">
-    <p>声明：本工具所有图像采样与分析过程均在浏览器前端离线完成，不会上传任何数据至服务器。</p>
-    <p>
-        开发者：<a href="https://github.com/3049298988" target="_blank" rel="noopener noreferrer">3049298988</a> | 
-        项目开源主页：<a href="https://github.com/3049298988/PixelBead-Crafts" target="_blank" rel="noopener noreferrer">PixelBead-Crafts</a>
-    </p>
-</footer>
-
-<div id="customTooltip"></div>
-<script src="script.js"></script>
-</body>
+        <div id="exportModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content glass-panel">
+                <div class="modal-header">
+                    <h2 style="margin: 0; font-size: 18px;">导出设置</h2> <button id="closeExportModalBtn" class="btn-icon">×</button>
+                </div>
+                <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="form-group"><label>文件名规则 (支持变量: {time})</label> <input type="text" id="fileNameRule" value="pixelbead_{time}">
+                    </div>
+                    <div class="form-group"><label>下载 PNG 导出长宽分辨率 (px)</label>
+                        <div class="row-group">
+                            <div><label>宽度 (X)</label> <input type="number" id="pngWidth" value="1000" min="100" max="8000">
+                            </div>
+                            <div><label>高度 (Y)</label> <input type="number" id="pngHeight" value="1000" min="100" max="8000">
+                            </div>
+                        </div> <small class="export-desc" style="margin-top: 4px;">为了保证图片质量，将自动匹配网格规格</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="customTooltip"></div>
+        <script type="module" src="js/main.js"></script>
+    </body>
 </html>
